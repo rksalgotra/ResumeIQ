@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Shortlisting System</title>
+</head>
+<body>
+    <h1>Resume Shortlisting System</h1>
+    <form enctype="multipart/form-data" method="POST" action="/">
+        <label for="resume">Upload Resume (PDF only):</label>
+        <input type="file" id="resume" name="resume" accept=".pdf" required><br><br>
+
+        <label for="experience">Years of Experience (Decimal only):</label>
+        <input type="text" id="experience" name="experience" pattern="^\d*(\.\d+)?$" required><br><br>
+
+        <label for="job-description">Job Description and Keywords:</label>
+        <textarea id="job-description" name="job_description" rows="5" cols="50" required></textarea><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Results</h2>
+    <table border="1" id="results-table">
+        <thead>
+            <tr>
+                <th>Candidate Name</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>LinkedIn</th>
+                <th>Core Skills</th>
+                <th>Skill Match (%)</th>
+                <th>ATS Score (%)</th>
+                <th>Date Format Valid</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result["Candidate Name"] }}</td>
+                <td>{{ result["Contact"] }}</td>
+                <td>{{ result["Email"] }}</td>
+                <td>{{ result["LinkedIn"] }}</td>
+                <td>{{ result["Core Skills"] }}</td>
+                <td>{{ result["Skill Match (%)"] }}</td>
+                <td>{{ result["ATS Score (%)"] }}</td>
+                <td>{{ result["Date Format Valid"] }}</td>
+                <td>{{ result["Result"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
