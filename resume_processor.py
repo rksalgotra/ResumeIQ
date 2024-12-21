@@ -57,27 +57,96 @@ def parse_date(date_str):
     raise ValueError(f"Unknown date format: {date_str}")
 
 
-# Match keywords
+# Match keywords and return Match Score
 def match_keywords(text, keywords):
-    matched = {}
-    for keyword in keywords:
-        count = text.lower().count(keyword.lower())
-        if count > 0:
-            matched[keyword] = count
-    return matched
+    matched = [keyword for keyword in keywords if keyword.lower() in text.lower()]
+    match_count = len(matched)
+    total_keywords = len(keywords)
+    skill_match_score = (match_count / total_keywords) * 100 if total_keywords > 0 else 0
+    return skill_match_score
 
-# Calculate experience
+# Match keywords and return only matching keywords
+def keywords_found(text, keywords):
+    matched = []
+    for keyword in keywords:
+        if keyword.lower() in text.lower():
+            matched.append(keyword)
+    return matched
+"""
+# Calculate experience in months based on extracted dates and keywords
 def calculate_experience(employment_text, keywords):
     experience = {keyword: 0 for keyword in keywords}
     dates = extract_dates(employment_text)
+    
     if len(dates) >= 2:
         for i in range(0, len(dates) - 1, 2):
             start, end = dates[i], dates[i + 1]
+            
+            # Ensure start date is before end date
+            if start > end:
+                start, end = end, start  # Swap dates if they're in the wrong order
+
+            # Calculate duration in months
             duration_months = (end.year - start.year) * 12 + end.month - start.month
+            if duration_months < 0:
+                duration_months = 0  # Ensure that duration cannot be negative
+            
+            # Add experience for each keyword
             for keyword in keywords:
                 if keyword in employment_text.lower():
                     experience[keyword] += duration_months
+    
     return experience
+"""
+# Search for section headings and extract the relevant employment/project text
+def extract_relevant_sections(text):
+    # Define possible section headings
+    section_headings = [
+        "PROJECTS HANDLED", "Work History", "PROJECTS", "Employment History", 
+        "Key Projects", "Work Experience", "PROJECT EXPERIENCE"
+    ]
+    
+    relevant_text = ""
+    
+    # Check for section headings and extract the content following them
+    for heading in section_headings:
+        match = re.search(rf"({heading})(.*?)(?=\n[A-Z ]+|\Z)", text, re.IGNORECASE | re.DOTALL)
+        if match:
+            relevant_text += match.group(2)  # Append the content after the heading
+    
+    return relevant_text
+
+# Calculate experience in months based on extracted dates and keywords
+def calculate_experience(employment_text, keywords):
+    experience = {keyword: 0 for keyword in keywords}
+    
+    # Extract the relevant sections of the resume
+    relevant_text = extract_relevant_sections(employment_text)
+    
+    # Extract dates from the relevant sections
+    dates = extract_dates(relevant_text)
+    
+    # If there are at least two dates (start and end dates), proceed with the calculations
+    if len(dates) >= 2:
+        for i in range(0, len(dates) - 1, 2):
+            start, end = dates[i], dates[i + 1]
+            
+            # Ensure start date is before end date
+            if start > end:
+                start, end = end, start  # Swap dates if they're in the wrong order
+
+            # Calculate duration in months
+            duration_months = (end.year - start.year) * 12 + end.month - start.month
+            if duration_months < 0:
+                duration_months = 0  # Ensure that duration cannot be negative
+            
+            # Add experience for each keyword
+            for keyword in keywords:
+                if keyword in employment_text.lower():
+                    experience[keyword] += duration_months
+    
+    return experience
+
 
 # Check ATS compliance
 def check_ats_compliance(text, ats_rules):
